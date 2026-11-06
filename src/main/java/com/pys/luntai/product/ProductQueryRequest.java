@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ProductQueryRequest {
-    // 品牌型号模糊搜索（搜索品牌、名称）
+    // 品牌、名称、规格模糊搜索，纯数字关键词支持省略规格中的 R
     private String keyword;
 
     // 分类：四季轮胎、冬季轮胎

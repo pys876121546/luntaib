@@ -446,7 +446,7 @@ GET /api/product/list
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| keyword | string | 否 | 关键词模糊搜索（品牌、型号、规格） |
+| keyword | string | 否 | 关键词模糊搜索（品牌、型号、规格），纯数字支持省略规格中的 R，例如 2656518 可匹配 26565R18 |
 | category | string | 否 | 分类（前端传啥存啥，不做转换） |
 | brand | string | 否 | 品牌筛选 |
 | width | string | 否 | 胎宽筛选 |

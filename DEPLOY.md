@@ -1,12 +1,12 @@
 # 宝塔面板 Docker 部署指南
 
-> 前置条件：已安装宝塔面板，已安装 Docker 管理器
+> 前置条件为已安装宝塔面板和 Docker 管理器。Docker 会使用 Java 21 多阶段构建自动编译源码并打包。服务器需能下载基础镜像、Gradle 分发包及 Maven 依赖。
 
 ---
 
 ## 一、上传项目文件到服务器
 
-### 方式 1：直接上传源码（推荐）
+### 上传源码
 
 1. 宝塔面板 → 文件 → 进入 `/www/wwwroot/`
 2. 新建目录 `luntai`，进入
@@ -16,19 +16,17 @@
 cd /www/wwwroot/luntai
 
 # 如果是 git 仓库
-git clone <你的仓库地址> .
+git clone https://github.com/pys876121546/luntaib.git .
 ```
 
-### 方式 2：本地打包后上传 jar
+### 构建所需文件
 
-1. 本地打包：
-```bash
-./gradlew build -x test
-```
+- `Dockerfile`
+- `gradlew`、`build.gradle`、`settings.gradle`
+- `gradle/wrapper/` 目录（包含 Wrapper JAR 和配置文件）
+- `src/main/` 目录（包含 Java 源码和资源配置）
 
-2. 上传到服务器：
-   - `build/libs/luntai-0.0.1-SNAPSHOT.jar` → `/www/wwwroot/luntai/app.jar`
-   - `application.properties` 和 `application-prod.properties` → 同目录
+本地未提交或未推送的修改需要通过上传更新后的文件同步到服务器。
 
 ---
 
@@ -49,6 +47,8 @@ file.server.url=${FILE_SERVER_URL:https://tire.shengjupay.com}
 > 无需手动创建，直接使用项目中的配置文件即可。如需修改域名，通过运行时的环境变量传入。
 
 ### 2.2 构建镜像
+
+Dockerfile 的构建阶段运行 `bootJar`，生成可运行 JAR 后复制到 Java 21 JRE 运行镜像。此流程只打包主代码，测试应在部署前单独验证。首次构建需要下载依赖，耗时取决于服务器网络。
 
 **方式 A：宝塔 Docker 管理器**
 1. 宝塔面板 → Docker → 镜像 → 构建
@@ -182,8 +182,8 @@ docker restart luntai
 
 # 更新版本
 cd /www/wwwroot/luntai
-git pull (或重新上传文件)
-./gradlew build -x test   # 本地打包后上传 jar
+git pull
+# 如果修改尚未推送到远程仓库，请上传更新后的源码和 Dockerfile。
 docker build -t luntai .
 docker stop luntai && docker rm luntai
 docker run -d --name luntai --restart always -p 8080:8080 -v /data/uploads:/app/uploads -e FILE_SERVER_URL=https://tire.shengjupay.com luntai

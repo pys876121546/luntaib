@@ -31,13 +31,16 @@ public class ProductService {
         // 2. 构建查询条件
         LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<>();
 
-        // 关键词模糊搜索（品牌、型号、规格）
+        // 关键词模糊搜索（品牌、型号、规格），兼容省略 R 的数字规格
         if (StringUtils.hasText(request.getKeyword())) {
             wrapper.and(w -> w.like(Product::getBrand, request.getKeyword())
                     .or()
                     .like(Product::getName, request.getKeyword())
                     .or()
-                    .like(Product::getSpec, request.getKeyword()));
+                    .like(Product::getSpec, request.getKeyword())
+                    .or(request.getKeyword().matches("[0-9]+"), compact -> compact.apply(
+                            "REPLACE(REPLACE(spec, 'R', ''), 'r', '') LIKE {0}",
+                            "%" + request.getKeyword() + "%")));
         }
 
         // 分类
